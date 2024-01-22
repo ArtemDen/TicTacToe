@@ -1,0 +1,15 @@
+<RCC>
+    <qresource prefix="/">
+        <file>main.qml</file>
+        <file>Components/TransparentButton.qml</file>
+        <file>Components/StyleText.qml</file>
+        <file>Components/InfoBox.qml</file>
+        <file>Pages/MainMenu.qml</file>
+        <file>Pages/Game.qml</file>
+        <file>Fonts/comic.ttf</file>
+        <file>Fonts/comicbd.ttf</file>
+        <file>Fonts/comici.ttf</file>
+        <file>Fonts/comicz.ttf</file>
+        <file>Components/IP.qml</file>
+    </qresource>
+</RCC>
