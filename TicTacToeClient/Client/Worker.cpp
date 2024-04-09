@@ -56,18 +56,11 @@ void Worker::vMakeTurn(quint16 uiRow, quint16 uiColumn)
 void Worker::vUpdateServerAddress(const QString &crstrAddress)
 {
   // Lock for updating
-  _bAddressUpdateRequired.store(true);
-  std::unique_lock<std::mutex> oLock(_oAddressMutex);
-
-  if (_oClientData._poSocket->state() != QAbstractSocket::UnconnectedState) {
-    _oClientData._poSocket->disconnectFromHost();
-    _oClientData._poSocket->waitForDisconnected();
+  {
+    std::unique_lock<std::mutex> oLock(_oAddressMutex);
+    _bAddressUpdateRequired.store(true);
+    _oAddress.setAddress(crstrAddress);
   }
-  _oAddress.setAddress(crstrAddress);
-
-  _bAddressUpdateRequired.store(false);
-  _oCondition.notify_all();
-
   vSaveConfig();
 }
 //-------------------------------------------------------------------------------------------------
@@ -78,10 +71,11 @@ void Worker::vWork()
 
   while (!_bStopSign.load()) {
 
-    // Waiting for update
-    std::unique_lock<std::mutex> oAddressLock(_oAddressMutex);
+    // Address has been updated
     if (_bAddressUpdateRequired.load()) {
-      _oCondition.wait(oAddressLock);
+      _oClientData._poSocket->disconnectFromHost();
+      _oClientData._poSocket->waitForDisconnected();
+      _bAddressUpdateRequired.store(false);
     }
 
     // Connection
@@ -93,7 +87,10 @@ void Worker::vWork()
       _oClientData._enState = ClientState::Default;
 
       // Reconnection
-      _oClientData._poSocket->connectToHost(_oAddress, cuiPort);
+      {
+        std::unique_lock<std::mutex> oLock(_oAddressMutex);
+       _oClientData._poSocket->connectToHost(_oAddress, cuiPort);
+      }
       emit sigConnecting();
 
       if (_oClientData._poSocket->waitForConnected()) {

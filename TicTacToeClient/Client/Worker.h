@@ -105,16 +105,13 @@ private:
   /** Messages for sending */
   std::queue<std::shared_ptr<MsgBase>> _queMsgSendQueue;
 
-  /** Stop sign */
-  std::atomic<bool> _bStopSign;
-
-  /** Sending queue utex */
+  /** Synchronization mutexes */
   std::mutex _oQueueMutex;
-
-  /** Address updating control */
-  std::atomic<bool> _bAddressUpdateRequired;
   std::mutex _oAddressMutex;
-  std::condition_variable _oCondition;
+
+  /** Atomic variables */
+  std::atomic<bool> _bStopSign;
+  std::atomic<bool> _bAddressUpdateRequired;
 
   /** Server's IP */
   QHostAddress _oAddress;
